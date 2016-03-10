@@ -1,0 +1,42 @@
+{
+	"name": "gitignore",
+	"displayName": "gitignore",
+	"description": "A simple for Visual Studio Code that lets you pull `.gitignore` files from the https://github.com/github/gitignore repository",
+	"version": "0.0.1",
+	"publisher": "CodeZombie",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/npm/npm.git"
+	},
+	"license" : "MIT",
+	"engines": {
+		"vscode": "^0.10.10"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:addgitignore"
+	],
+	"main": "./out/src/extension",
+	"contributes": {
+		"commands": [
+			{
+				"command": "addgitignore",
+				"title": "Add gitignore"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+		"compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
+		"postinstall": "node ./node_modules/vscode/bin/install"
+	},
+	"devDependencies": {
+		"typescript": "^1.8.5",
+		"vscode": "^0.11.0"
+	},
+	"dependencies": {
+		"github": "^0.2.4"
+	}
+}
