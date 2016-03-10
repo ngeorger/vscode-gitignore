@@ -1,6 +1,6 @@
 # gitignore extension for Visual Studio Code
 
-A simple extension that lets you pull `.gitignore` files from the [github/gitignore](https://github.com/github/gitignore) repository.
+A simple extension for Visual Studio Code that lets you pull `.gitignore` files from the [github/gitignore](https://github.com/github/gitignore) repository.
 
 
 ## Usage

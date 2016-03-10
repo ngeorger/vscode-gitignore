@@ -1,7 +1,7 @@
 {
   "name": "gitignore",
   "displayName": "gitignore",
-  "description": "A simple for Visual Studio Code that lets you pull `.gitignore` files from the https://github.com/github/gitignore repository",
+  "description": "A simple extension for Visual Studio Code that lets you pull .gitignore files from the https://github.com/github/gitignore repository",
   "version": "0.1.0",
   "publisher": "codezombiech",
   "repository": {
