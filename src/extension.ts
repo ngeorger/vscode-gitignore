@@ -104,6 +104,12 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('extension "gitignore" is now active!');
 
 	let disposable = vscode.commands.registerCommand('addgitignore', () => {
+		// Check if workspace open
+		if(!vscode.workspace.rootPath) {
+			vscode.window.showErrorMessage('No workspace directory open');
+			return;
+		}
+		
 		Promise.resolve(vscode.window.showQuickPick(gitignoreRepository.getFiles()))
 			.then((file: any) => {
 				var path = vscode.workspace.rootPath + '/.gitignore';
