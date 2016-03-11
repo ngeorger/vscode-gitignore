@@ -11,4 +11,11 @@ Basic implementation that allows pulling a single `.gitignore` file
 
 
 ## v0.1.3
+
 - Added icon
+
+
+## v0.1.4
+
+- Fixed url to github repository
+- Added url to github issues
