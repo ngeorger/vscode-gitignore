@@ -20,3 +20,8 @@ Support adding multiple .gitignore files and merge it to a `.gitignore` file
 ## License
 
 See LICENSE file
+
+
+## Credits
+
+Icon based on the Git logo by Jason Long

@@ -1,4 +1,5 @@
 .vscode/**
+logo/**
 typings/**
 out/test/**
 test/**
