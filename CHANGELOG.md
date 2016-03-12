@@ -19,3 +19,4 @@ Basic implementation that allows pulling a single `.gitignore` file
 
 - Fixed url to github repository
 - Added url to github issues
+- Exposed a setting named "gitignore.cacheExpirationInterval" that controls how long the `.gitignore` files retrieved from the github repository are stored in cache. Defaults to 3600 seconds.

@@ -7,15 +7,38 @@ const fs = require('fs');
 const https = require('https');
 
 
+class CacheItem {
+	private _value: any;
+	private storeDate: Date;
+	
+	get value(): any {
+		return this._value;
+	}
+	
+	constructor(value: any) {
+		this._value = value;
+		this.storeDate = new Date();
+	}
+	
+	public isExpired(expirationInterval: number): boolean {
+		return this.storeDate.getTime() + expirationInterval * 1000 < Date.now();
+	}
+}
+
 interface GitignoreFile extends vscode.QuickPickItem {
 	url: string;
 }
 
 class GitignoreRepository {
-	private cache;
+	private cache: CacheItem;
+	/**
+	 * Cache expiration intervall in seconds
+	 */
+	private cacheExpirationInterval: number;
 	
 	constructor(private client) {
-		
+		let config = vscode.workspace.getConfiguration('gitignore');
+		this.cacheExpirationInterval = config.get('cacheExpirationInterval', 3600);
 	}
 
 	/**
@@ -24,8 +47,8 @@ class GitignoreRepository {
 	public getFiles(): Promise<GitignoreFile[]> {
 		return new Promise((resolve, reject) => {
 			// If cached, return cached content
-			if(this.cache) {
-				resolve(this.cache);
+			if(this.cache && !this.cache.isExpired(this.cacheExpirationInterval)) {
+				resolve(this.cache.value);
 				return;
 			}
 
@@ -53,7 +76,7 @@ class GitignoreRepository {
 					});
 
 				// Cache the retrieved gitignore files
-				this.cache = files;
+				this.cache = new CacheItem(files);
 
 				resolve(files);
 			});
@@ -74,7 +97,7 @@ class GitignoreRepository {
 						resolve(gitignoreFile);
 					});
 				});
-			}).on('error', (err) => {
+			}).on('error', err => {
 				// Delete the file
 				fs.unlink(path);
 				reject(err.message);
@@ -111,7 +134,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		
 		Promise.resolve(vscode.window.showQuickPick(gitignoreRepository.getFiles()))
-			.then((file: any) => {
+			.then((file: GitignoreFile) => {
 				var path = vscode.workspace.rootPath + '/.gitignore';
 				console.log(path);
 
@@ -132,7 +155,7 @@ export function activate(context: vscode.ExtensionContext) {
 				// Store the file on file system
 				return gitignoreRepository.download(s.file, s.path);
 			})
-			.then((file: any) => {
+			.then((file: GitignoreFile) => {
 				vscode.window.showInformationMessage(`Added ${file.description} to your project root`);
 			})
 			.catch(reason => {

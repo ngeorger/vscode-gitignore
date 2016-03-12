@@ -5,7 +5,17 @@ A simple extension for Visual Studio Code that lets you pull `.gitignore` files 
 
 ## Usage
 
-Start command palette [Ctrl+Shift+P] and type `Add gitignore`
+Start command palette <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and type `Add gitignore`
+
+
+## Settings
+
+```JSON
+{
+	// Number of seconds the list of `.gitignore` files retrieved from github will be cached
+	"gitignore.cacheExpirationInterval": 3600
+}
+```
 
 
 ## Roadmap
