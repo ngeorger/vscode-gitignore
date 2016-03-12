@@ -1,7 +1,7 @@
 {
 	"name": "gitignore",
 	"displayName": "gitignore",
-	"description": "An extension that lets you pull .gitignore files from the https://github.com/github/gitignore repository",
+	"description": "Extension that lets you pull .gitignore files from the https://github.com/github/gitignore repository",
 	"version": "0.1.4",
 	"publisher": "codezombiech",
 	"icon": "icon.png",

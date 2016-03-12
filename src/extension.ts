@@ -7,19 +7,23 @@ const fs = require('fs');
 const https = require('https');
 
 
+class CancellationError extends Error {
+
+}
+
 class CacheItem {
 	private _value: any;
 	private storeDate: Date;
-	
+
 	get value(): any {
 		return this._value;
 	}
-	
+
 	constructor(value: any) {
 		this._value = value;
 		this.storeDate = new Date();
 	}
-	
+
 	public isExpired(expirationInterval: number): boolean {
 		return this.storeDate.getTime() + expirationInterval * 1000 < Date.now();
 	}
@@ -35,14 +39,14 @@ class GitignoreRepository {
 	 * Cache expiration intervall in seconds
 	 */
 	private cacheExpirationInterval: number;
-	
+
 	constructor(private client) {
 		let config = vscode.workspace.getConfiguration('gitignore');
 		this.cacheExpirationInterval = config.get('cacheExpirationInterval', 3600);
 	}
 
 	/**
-	 * Get all .gitignore files 
+	 * Get all .gitignore files
 	 */
 	public getFiles(): Promise<GitignoreFile[]> {
 		return new Promise((resolve, reject) => {
@@ -112,11 +116,11 @@ var client = new GitHubApi({
 	version: '3.0.0',
 	protocol: 'https',
 	host: 'api.github.com',
-	//debug: true, 
+	//debug: true,
 	pathPrefix: '',
 	timeout: 5000,
 	headers: {
-		'user-agent': 'vscode-gitignore-extension' 
+		'user-agent': 'vscode-gitignore-extension'
 	}
 });
 
@@ -132,11 +136,15 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage('No workspace directory open');
 			return;
 		}
-		
+
 		Promise.resolve(vscode.window.showQuickPick(gitignoreRepository.getFiles()))
 			.then((file: GitignoreFile) => {
+				if(!file) {
+					// Cancel
+					throw new CancellationError();
+				}
+
 				var path = vscode.workspace.rootPath + '/.gitignore';
-				console.log(path);
 
 				return new Promise((resolve, reject) => {
 					// Check if file exists
@@ -159,6 +167,10 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showInformationMessage(`Added ${file.description} to your project root`);
 			})
 			.catch(reason => {
+				if(reason instanceof CancellationError) {
+					return;
+				}
+
 				vscode.window.showErrorMessage(reason);
 			});
 	});
