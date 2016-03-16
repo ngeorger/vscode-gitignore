@@ -21,3 +21,7 @@ Basic implementation that allows pulling a single `.gitignore` file
 - Added url to github issues
 - Exposed a setting named "gitignore.cacheExpirationInterval" that controls how long the `.gitignore` files retrieved from the github repository are stored in cache. Defaults to 3600 seconds.
 - Fixed cancellation of the `Add gitignore` command not beeing handled correctly
+
+## v0.1.5
+
+- Properly declared the exposed settings in the package.json. This way the user gets support from Visual Studio Code when authoring the settings files.

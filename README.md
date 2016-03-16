@@ -10,7 +10,7 @@ Start command palette <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and type `Ad
 
 ## Settings
 
-```JSON
+```JavaScript
 {
 	// Number of seconds the list of `.gitignore` files retrieved from github will be cached
 	"gitignore.cacheExpirationInterval": 3600
