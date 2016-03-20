@@ -6,5 +6,7 @@ test/**
 src/**
 **/*.map
 .gitignore
+.editorconfig
 tsconfig.json
 vsc-extension-quickstart.md
+TODO.md
