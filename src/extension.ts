@@ -67,7 +67,7 @@ class GitignoreRepository {
 					return;
 				}
 
-				var files = response
+				let files = response
 					.filter(file => {
 						return (file.type === 'file' && file.name.endsWith('.gitignore'));
 					})
@@ -92,8 +92,8 @@ class GitignoreRepository {
 	 */
 	public download(gitignoreFile: GitignoreFile, path: string): Promise<GitignoreFile> {
 		return new Promise((resolve, reject) => {
-			var file = fs.createWriteStream(path);
-			var request = https.get(gitignoreFile.url, function(response) {
+			let file = fs.createWriteStream(path);
+			let request = https.get(gitignoreFile.url, function(response) {
 				response.pipe(file);
 
 				file.on('finish', () => {
@@ -112,7 +112,7 @@ class GitignoreRepository {
 
 
 // Create a Github API client
-var client = new GitHubApi({
+let client = new GitHubApi({
 	version: '3.0.0',
 	protocol: 'https',
 	host: 'api.github.com',
@@ -125,7 +125,7 @@ var client = new GitHubApi({
 });
 
 // Create gitignore repository
-var gitignoreRepository = new GitignoreRepository(client);
+let gitignoreRepository = new GitignoreRepository(client);
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('extension "gitignore" is now active!');
