@@ -25,3 +25,7 @@ Basic implementation that allows pulling a single `.gitignore` file
 ## v0.1.5
 
 - Properly declared the exposed settings in the package.json. This way the user gets support from Visual Studio Code when authoring the settings files.
+
+## v0.2.0
+
+- Added language support for `.gitignore` files
