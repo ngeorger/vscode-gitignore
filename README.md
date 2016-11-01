@@ -33,6 +33,9 @@ Basic implementation that allows to pull a single `.gitignore` file
 Add language support for `.gitignore` files
 
 ### v0.3
+Support reading `.gitignore` files from subdirectories in the github/gitignore repository
+
+### v0.4
 Support adding multiple .gitignore files and merge it to a `.gitignore` file
 
 
@@ -49,3 +52,4 @@ See LICENSE file
 ## Credits
 
 Icon based on the Git logo by Jason Long
+

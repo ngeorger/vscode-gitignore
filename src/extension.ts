@@ -29,11 +29,11 @@ class CacheItem {
 	}
 }
 
-interface GitignoreFile extends vscode.QuickPickItem {
+export interface GitignoreFile extends vscode.QuickPickItem {
 	url: string;
 }
 
-class GitignoreRepository {
+export class GitignoreRepository {
 	private cache: CacheItem;
 	/**
 	 * Cache expiration intervall in seconds
@@ -48,7 +48,7 @@ class GitignoreRepository {
 	/**
 	 * Get all .gitignore files
 	 */
-	public getFiles(): Promise<GitignoreFile[]> {
+	public getFiles(path: string = ''): Promise<GitignoreFile[]> {
 		return new Promise((resolve, reject) => {
 			// If cached, return cached content
 			if(this.cache && !this.cache.isExpired(this.cacheExpirationInterval)) {
@@ -60,7 +60,7 @@ class GitignoreRepository {
 			this.client.repos.getContent({
 				user: 'github',
 				repo: 'gitignore',
-				path: ''
+				path: path
 			}, (err, response) => {
 				if(err) {
 					reject(err.message);
@@ -74,7 +74,7 @@ class GitignoreRepository {
 					.map(file => {
 						return {
 							label: file.name.replace(/\.gitignore/, ''),
-							description: file.name,
+							description: file.path,
 							url: file.download_url
 						}
 					});
@@ -137,42 +137,53 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		Promise.resolve(vscode.window.showQuickPick(gitignoreRepository.getFiles()))
-			.then((file: GitignoreFile) => {
-				if(!file) {
-					// Cancel
-					throw new CancellationError();
-				}
+		// Get lists of .gitignore files from Github
+		Promise.all([
+			gitignoreRepository.getFiles(),
+			gitignoreRepository.getFiles('Global')
+		])
+		.then((result) => {
+			// Merge the two result sets
+			let files: GitignoreFile[] = Array.prototype.concat.apply([], result)
+				.sort((a, b) => a.label.localeCompare(b.label));
 
-				var path = vscode.workspace.rootPath + '/.gitignore';
+			return vscode.window.showQuickPick(files);
+		})
+		.then((file: GitignoreFile) => {
+			if(!file) {
+				// Cancel
+				throw new CancellationError();
+			}
 
-				return new Promise((resolve, reject) => {
-					// Check if file exists
-					fs.stat(path, (err, stats) => {
-						if(err) {
-							// File does not exists -> we are fine to create it
-							resolve({ path: path, file: file });
-						}
-						else {
-							reject('.gitignore already exists');
-						}
-					});
+			var path = vscode.workspace.rootPath + '/.gitignore';
+
+			return new Promise((resolve, reject) => {
+				// Check if file exists
+				fs.stat(path, (err, stats) => {
+					if(err) {
+						// File does not exists -> we are fine to create it
+						resolve({ path: path, file: file });
+					}
+					else {
+						reject('.gitignore already exists');
+					}
 				});
-			})
-			.then((s: any) => {
-				// Store the file on file system
-				return gitignoreRepository.download(s.file, s.path);
-			})
-			.then((file: GitignoreFile) => {
-				vscode.window.showInformationMessage(`Added ${file.description} to your project root`);
-			})
-			.catch(reason => {
-				if(reason instanceof CancellationError) {
-					return;
-				}
-
-				vscode.window.showErrorMessage(reason);
 			});
+		})
+		.then((s: any) => {
+			// Store the file on file system
+			return gitignoreRepository.download(s.file, s.path);
+		})
+		.then((file: GitignoreFile) => {
+			vscode.window.showInformationMessage(`Added ${file.description} to your project root`);
+		})
+		.catch(reason => {
+			if(reason instanceof CancellationError) {
+				return;
+			}
+
+			vscode.window.showErrorMessage(reason);
+		});
 	});
 
 	context.subscriptions.push(disposable);
