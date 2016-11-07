@@ -1,6 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import {Cache, CacheItem} from './cache';
 
 const GitHubApi = require('github');
 const fs = require('fs');
@@ -11,38 +12,16 @@ class CancellationError extends Error {
 
 }
 
-class CacheItem {
-	private _value: any;
-	private storeDate: Date;
-
-	get value(): any {
-		return this._value;
-	}
-
-	constructor(value: any) {
-		this._value = value;
-		this.storeDate = new Date();
-	}
-
-	public isExpired(expirationInterval: number): boolean {
-		return this.storeDate.getTime() + expirationInterval * 1000 < Date.now();
-	}
-}
-
 export interface GitignoreFile extends vscode.QuickPickItem {
 	url: string;
 }
 
 export class GitignoreRepository {
-	private cache: CacheItem;
-	/**
-	 * Cache expiration intervall in seconds
-	 */
-	private cacheExpirationInterval: number;
+	private cache: Cache;
 
 	constructor(private client) {
 		let config = vscode.workspace.getConfiguration('gitignore');
-		this.cacheExpirationInterval = config.get('cacheExpirationInterval', 3600);
+		this.cache = new Cache(config.get('cacheExpirationInterval', 3600));
 	}
 
 	/**
@@ -51,8 +30,9 @@ export class GitignoreRepository {
 	public getFiles(path: string = ''): Promise<GitignoreFile[]> {
 		return new Promise((resolve, reject) => {
 			// If cached, return cached content
-			if(this.cache && !this.cache.isExpired(this.cacheExpirationInterval)) {
-				resolve(this.cache.value);
+			let item = this.cache.get('gitignore/' + path);
+			if(typeof item !== 'undefined') {
+				resolve(item);
 				return;
 			}
 
@@ -80,7 +60,7 @@ export class GitignoreRepository {
 					});
 
 				// Cache the retrieved gitignore files
-				this.cache = new CacheItem(files);
+				this.cache.add(new CacheItem('gitignore/' + path, files));
 
 				resolve(files);
 			});
