@@ -36,3 +36,8 @@ Basic implementation that allows pulling a single `.gitignore` file
 ## v0.3.0
 
 - Added support to pull `.gitignore` files from subdirectories inside the github/gitignore repository (#3 requested by @russinow)
+
+
+## v0.3.1
+
+- Fixed bug listing the `.gitignore` files from the root directory twice after running the "Add .gitignore" operation more than once (caching issue)
