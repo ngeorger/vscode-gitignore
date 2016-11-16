@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.4.0
+
+- Added support to append to or overwrite an existing `.gitignore` file. This new feature allows creating `.gitignore` files based on multiple `.gitignore` files from the repository (resolves #4 requested by @Sidneys1).
+- Added Travis CI integration
+
+
 ## v0.3.1
 
 - Fixed bug listing the `.gitignore` files from the root directory twice after running the "Add .gitignore" operation more than once (caching issue)
@@ -7,7 +13,7 @@
 
 ## v0.3.0
 
-- Added support to pull `.gitignore` files from subdirectories inside the github/gitignore repository (#3 requested by @russinow)
+- Added support to pull `.gitignore` files from subdirectories inside the github/gitignore repository (resolves #3 requested by @russinow)
 
 
 ## v0.2.0
