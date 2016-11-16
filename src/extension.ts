@@ -1,5 +1,3 @@
-'use strict';
-
 import * as vscode from 'vscode';
 import {Cache, CacheItem} from './cache';
 
@@ -10,6 +8,17 @@ const https = require('https');
 
 class CancellationError extends Error {
 
+}
+
+enum OperationType {
+	Append,
+	Overwrite
+}
+
+interface GitignoreOperation {
+	type: OperationType;
+	path: string;
+	file: GitignoreFile;
 }
 
 export interface GitignoreFile extends vscode.QuickPickItem {
@@ -27,7 +36,7 @@ export class GitignoreRepository {
 	/**
 	 * Get all .gitignore files
 	 */
-	public getFiles(path: string = ''): Promise<GitignoreFile[]> {
+	public getFiles(path: string = ''): Thenable<GitignoreFile[]> {
 		return new Promise((resolve, reject) => {
 			// If cached, return cached content
 			let item = this.cache.get('gitignore/' + path);
@@ -46,6 +55,8 @@ export class GitignoreRepository {
 					reject(err.message);
 					return;
 				}
+
+				console.log(`Github API ratelimit remaining: ${response.meta['x-ratelimit-remaining']}`);
 
 				let files = response
 					.filter(file => {
@@ -70,20 +81,27 @@ export class GitignoreRepository {
 	/**
 	 * Downloads a .gitignore from the repository to the path passed
 	 */
-	public download(gitignoreFile: GitignoreFile, path: string): Promise<GitignoreFile> {
+	public download(operation: GitignoreOperation): Thenable<GitignoreOperation> {
 		return new Promise((resolve, reject) => {
-			let file = fs.createWriteStream(path);
-			let request = https.get(gitignoreFile.url, function(response) {
+			let flags = operation.type === OperationType.Overwrite ? 'w' : 'a';
+			let file = fs.createWriteStream(operation.path, {flags: flags});
+
+			// If appending to the existing .gitignore file, write a NEWLINE as seperator
+			if(flags === 'a') file.write('\n');
+
+			let request = https.get(operation.file.url, function(response) {
 				response.pipe(file);
 
 				file.on('finish', () => {
 					file.close(() => {
-						resolve(gitignoreFile);
+						resolve(operation);
 					});
 				});
 			}).on('error', err => {
-				// Delete the file
-				fs.unlink(path);
+				// Delete the .gitignore file if we created it
+				if(flags === 'w') {
+					fs.unlink(operation.path);
+				}
 				reject(err.message);
 			});
 		});
@@ -107,6 +125,31 @@ let client = new GitHubApi({
 // Create gitignore repository
 let gitignoreRepository = new GitignoreRepository(client);
 
+
+function promptForOperation() {
+	return vscode.window.showQuickPick([
+		{
+			label: 'Append',
+			description: 'Append to existing .gitignore file'
+		},
+		{
+			label: 'Overwrite',
+			description: 'Overwrite existing .gitignore file'
+		}
+	]);
+}
+
+function showSuccessMessage(operation: GitignoreOperation) {
+	switch (operation.type) {
+		case OperationType.Append:
+			return vscode.window.showInformationMessage(`Appended ${operation.file.description} to the existing .gitignore in the project root`);
+		case OperationType.Overwrite:
+			return vscode.window.showInformationMessage(`Created .gitignore file in the project root based on ${operation.file.description}`);
+		default:
+			throw new Error('Unsupported operation');
+	}
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	console.log('extension "gitignore" is now active!');
 
@@ -122,13 +165,14 @@ export function activate(context: vscode.ExtensionContext) {
 			gitignoreRepository.getFiles(),
 			gitignoreRepository.getFiles('Global')
 		])
+		// Merge the two result sets
 		.then((result) => {
-			// Merge the two result sets
 			let files: GitignoreFile[] = Array.prototype.concat.apply([], result)
 				.sort((a, b) => a.label.localeCompare(b.label));
 
 			return vscode.window.showQuickPick(files);
 		})
+		// Check if a .gitignore file exists
 		.then((file: GitignoreFile) => {
 			if(!file) {
 				// Cancel
@@ -137,25 +181,35 @@ export function activate(context: vscode.ExtensionContext) {
 
 			var path = vscode.workspace.rootPath + '/.gitignore';
 
-			return new Promise((resolve, reject) => {
+			return new Promise<GitignoreOperation>((resolve, reject) => {
 				// Check if file exists
 				fs.stat(path, (err, stats) => {
 					if(err) {
 						// File does not exists -> we are fine to create it
-						resolve({ path: path, file: file });
+						resolve({ path: path, file: file, type: OperationType.Overwrite });
 					}
 					else {
-						reject('.gitignore already exists');
+						promptForOperation()
+							.then(operation => {
+								if(!operation) {
+									// Cancel
+									reject(new CancellationError());
+									return;
+								}
+
+								resolve({ path: path, file: file, type:  OperationType[operation.label] });
+							});
 					}
 				});
 			});
 		})
-		.then((s: any) => {
-			// Store the file on file system
-			return gitignoreRepository.download(s.file, s.path);
+		// Store the file on file system
+		.then((operation: GitignoreOperation) => {
+			return gitignoreRepository.download(operation);
 		})
-		.then((file: GitignoreFile) => {
-			vscode.window.showInformationMessage(`Added ${file.description} to your project root`);
+		// Show success message
+		.then((operation) => {
+			return showSuccessMessage(operation);
 		})
 		.catch(reason => {
 			if(reason instanceof CancellationError) {
