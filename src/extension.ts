@@ -52,7 +52,7 @@ export class GitignoreRepository {
 				path: path
 			}, (err, response) => {
 				if(err) {
-					reject(err.message);
+					reject(`${err.code}: ${err.message}`);
 					return;
 				}
 
