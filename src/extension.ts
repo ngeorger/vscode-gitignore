@@ -47,7 +47,7 @@ export class GitignoreRepository {
 
 			// Download .gitignore files from github
 			this.client.repos.getContent({
-				user: 'github',
+				owner: 'github',
 				repo: 'gitignore',
 				path: path
 			}, (err, response) => {
