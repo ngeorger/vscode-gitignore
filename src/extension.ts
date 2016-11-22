@@ -4,6 +4,7 @@ import {Cache, CacheItem} from './cache';
 const GitHubApi = require('github');
 const fs = require('fs');
 const https = require('https');
+const url = require('url');
 
 
 class CancellationError extends Error {
@@ -56,7 +57,7 @@ export class GitignoreRepository {
 					return;
 				}
 
-				console.log(`Github API ratelimit remaining: ${response.meta['x-ratelimit-remaining']}`);
+				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.meta['x-ratelimit-remaining']}`);
 
 				let files = response
 					.filter(file => {
@@ -84,12 +85,18 @@ export class GitignoreRepository {
 	public download(operation: GitignoreOperation): Thenable<GitignoreOperation> {
 		return new Promise((resolve, reject) => {
 			let flags = operation.type === OperationType.Overwrite ? 'w' : 'a';
-			let file = fs.createWriteStream(operation.path, {flags: flags});
+			let file = fs.createWriteStream(operation.path, { flags: flags });
 
 			// If appending to the existing .gitignore file, write a NEWLINE as seperator
 			if(flags === 'a') file.write('\n');
 
-			let request = https.get(operation.file.url, function(response) {
+			let options = url.parse(operation.file.url);
+			options.agent = getAgent(); // Proxy
+			options.headers = {
+				'User-Agent': userAgent
+			};
+
+			let request = https.get(options, response => {
 				response.pipe(file);
 
 				file.on('finish', () => {
@@ -109,6 +116,14 @@ export class GitignoreRepository {
 }
 
 
+const userAgent = 'vscode-gitignore-extension';
+
+// Read proxy configuration
+let httpConfig = vscode.workspace.getConfiguration('http');
+let proxy = httpConfig.get('proxy', undefined);
+
+console.log(`vscode-gitignore: using proxy ${proxy}`);
+
 // Create a Github API client
 let client = new GitHubApi({
 	version: '3.0.0',
@@ -118,13 +133,30 @@ let client = new GitHubApi({
 	pathPrefix: '',
 	timeout: 5000,
 	headers: {
-		'user-agent': 'vscode-gitignore-extension'
-	}
+		'User-Agent': userAgent
+	},
+	proxy: proxy
 });
 
 // Create gitignore repository
 let gitignoreRepository = new GitignoreRepository(client);
 
+
+let agent;
+
+function getAgent() {
+	if(agent) return agent;
+
+	// Read proxy url in following order: vscode settings, environment variables
+	proxy = proxy || process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+
+	if(proxy) {
+		var HttpsProxyAgent = require('https-proxy-agent');
+		agent = new HttpsProxyAgent(proxy);
+	}
+
+	return agent;
+}
 
 function promptForOperation() {
 	return vscode.window.showQuickPick([
@@ -140,7 +172,7 @@ function promptForOperation() {
 }
 
 function showSuccessMessage(operation: GitignoreOperation) {
-	switch (operation.type) {
+	switch(operation.type) {
 		case OperationType.Append:
 			return vscode.window.showInformationMessage(`Appended ${operation.file.description} to the existing .gitignore in the project root`);
 		case OperationType.Overwrite:
@@ -151,7 +183,7 @@ function showSuccessMessage(operation: GitignoreOperation) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('extension "gitignore" is now active!');
+	console.log('vscode-gitignore: extension is now active!');
 
 	let disposable = vscode.commands.registerCommand('addgitignore', () => {
 		// Check if workspace open
@@ -165,59 +197,59 @@ export function activate(context: vscode.ExtensionContext) {
 			gitignoreRepository.getFiles(),
 			gitignoreRepository.getFiles('Global')
 		])
-		// Merge the two result sets
-		.then((result) => {
-			let files: GitignoreFile[] = Array.prototype.concat.apply([], result)
-				.sort((a, b) => a.label.localeCompare(b.label));
+			// Merge the two result sets
+			.then((result) => {
+				let files: GitignoreFile[] = Array.prototype.concat.apply([], result)
+					.sort((a, b) => a.label.localeCompare(b.label));
 
-			return vscode.window.showQuickPick(files);
-		})
-		// Check if a .gitignore file exists
-		.then((file: GitignoreFile) => {
-			if(!file) {
-				// Cancel
-				throw new CancellationError();
-			}
+				return vscode.window.showQuickPick(files);
+			})
+			// Check if a .gitignore file exists
+			.then((file: GitignoreFile) => {
+				if(!file) {
+					// Cancel
+					throw new CancellationError();
+				}
 
-			var path = vscode.workspace.rootPath + '/.gitignore';
+				var path = vscode.workspace.rootPath + '/.gitignore';
 
-			return new Promise<GitignoreOperation>((resolve, reject) => {
-				// Check if file exists
-				fs.stat(path, (err, stats) => {
-					if(err) {
-						// File does not exists -> we are fine to create it
-						resolve({ path: path, file: file, type: OperationType.Overwrite });
-					}
-					else {
-						promptForOperation()
-							.then(operation => {
-								if(!operation) {
-									// Cancel
-									reject(new CancellationError());
-									return;
-								}
+				return new Promise<GitignoreOperation>((resolve, reject) => {
+					// Check if file exists
+					fs.stat(path, (err, stats) => {
+						if(err) {
+							// File does not exists -> we are fine to create it
+							resolve({ path: path, file: file, type: OperationType.Overwrite });
+						}
+						else {
+							promptForOperation()
+								.then(operation => {
+									if(!operation) {
+										// Cancel
+										reject(new CancellationError());
+										return;
+									}
 
-								resolve({ path: path, file: file, type:  OperationType[operation.label] });
-							});
-					}
+									resolve({ path: path, file: file, type: OperationType[operation.label] });
+								});
+						}
+					});
 				});
-			});
-		})
-		// Store the file on file system
-		.then((operation: GitignoreOperation) => {
-			return gitignoreRepository.download(operation);
-		})
-		// Show success message
-		.then((operation) => {
-			return showSuccessMessage(operation);
-		})
-		.catch(reason => {
-			if(reason instanceof CancellationError) {
-				return;
-			}
+			})
+			// Store the file on file system
+			.then((operation: GitignoreOperation) => {
+				return gitignoreRepository.download(operation);
+			})
+			// Show success message
+			.then((operation) => {
+				return showSuccessMessage(operation);
+			})
+			.catch(reason => {
+				if(reason instanceof CancellationError) {
+					return;
+				}
 
-			vscode.window.showErrorMessage(reason);
-		});
+				vscode.window.showErrorMessage(reason);
+			});
 	});
 
 	context.subscriptions.push(disposable);
@@ -226,4 +258,5 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
+	console.log('vscode-gitignore: extension is now deactivated!');
 }
