@@ -12,6 +12,7 @@
 	"bugs": {
 		"url": "https://github.com/CodeZombieCH/vscode-gitignore/issues"
 	},
+	"homepage": "https://github.com/CodeZombieCH/vscode-gitignore/issues",
 	"license": "MIT",
 	"engines": {
 		"vscode": "^0.10.10"
