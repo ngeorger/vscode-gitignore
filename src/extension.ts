@@ -158,6 +158,20 @@ function getAgent() {
 	return agent;
 }
 
+function getGitignoreFiles() {
+	// Get lists of .gitignore files from Github
+	return Promise.all([
+		gitignoreRepository.getFiles(),
+		gitignoreRepository.getFiles('Global')
+	])
+		// Merge the two result sets
+		.then((result) => {
+			let files: GitignoreFile[] = Array.prototype.concat.apply([], result)
+				.sort((a, b) => a.label.localeCompare(b.label));
+			return files;
+		});
+}
+
 function promptForOperation() {
 	return vscode.window.showQuickPick([
 		{
@@ -192,17 +206,9 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		// Get lists of .gitignore files from Github
-		Promise.all([
-			gitignoreRepository.getFiles(),
-			gitignoreRepository.getFiles('Global')
-		])
-			// Merge the two result sets
-			.then((result) => {
-				let files: GitignoreFile[] = Array.prototype.concat.apply([], result)
-					.sort((a, b) => a.label.localeCompare(b.label));
-
-				return vscode.window.showQuickPick(files);
+		Promise.resolve()
+			.then(() => {
+				return vscode.window.showQuickPick(getGitignoreFiles());
 			})
 			// Check if a .gitignore file exists
 			.then((file: GitignoreFile) => {
