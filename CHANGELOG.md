@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.0
+
+- Implemented proxy support for requests made by this extension (resolves #1 requested by @LaurentChardin, @ibigpapa). A proxy can be set by Visual Studio Code settings (`http.proxy`) or by declaring environment variables (`HTTPS_PROXY`, `HTTP_PROXY`)
+- Added progress bar while retrieving the list of available `.gitignore` files (resolves #6)
+
+
 ## v0.4.0
 
 - Added support to append to or overwrite an existing `.gitignore` file. This new feature allows creating `.gitignore` files based on multiple `.gitignore` files from the repository (resolves #4 requested by @Sidneys1).
