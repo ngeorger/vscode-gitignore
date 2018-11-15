@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import {Cache, CacheItem} from './cache';
 
-const GitHubApi = require('github');
-const fs = require('fs');
-const https = require('https');
-const url = require('url');
+import * as GitHubApi from 'github';
+import * as HttpsProxyAgent from 'https-proxy-agent';
+import * as fs from 'fs';
+import * as https from 'https';
+import * as url from 'url';
 
 
 class CancellationError extends Error {
@@ -29,7 +30,7 @@ export interface GitignoreFile extends vscode.QuickPickItem {
 export class GitignoreRepository {
 	private cache: Cache;
 
-	constructor(private client) {
+	constructor(private client: any) {
 		let config = vscode.workspace.getConfiguration('gitignore');
 		this.cache = new Cache(config.get('cacheExpirationInterval', 3600));
 	}
@@ -51,7 +52,7 @@ export class GitignoreRepository {
 				owner: 'github',
 				repo: 'gitignore',
 				path: path
-			}, (err, response) => {
+			}, (err: any, response: any) => {
 				if(err) {
 					reject(`${err.code}: ${err.message}`);
 					return;
@@ -60,15 +61,15 @@ export class GitignoreRepository {
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.meta['x-ratelimit-remaining']}`);
 
 				let files = response
-					.filter(file => {
+					.filter((file: any) => {
 						return (file.type === 'file' && file.name.endsWith('.gitignore'));
 					})
-					.map(file => {
+					.map((file: any) => {
 						return {
 							label: file.name.replace(/\.gitignore/, ''),
 							description: file.path,
 							url: file.download_url
-						}
+						};
 					});
 
 				// Cache the retrieved gitignore files
@@ -88,26 +89,27 @@ export class GitignoreRepository {
 			let file = fs.createWriteStream(operation.path, { flags: flags });
 
 			// If appending to the existing .gitignore file, write a NEWLINE as seperator
-			if(flags === 'a') file.write('\n');
+			if(flags === 'a') {
+				file.write('\n');
+			}
 
-			let options = url.parse(operation.file.url);
+			let options: https.RequestOptions = url.parse(operation.file.url);
 			options.agent = getAgent(); // Proxy
 			options.headers = {
 				'User-Agent': userAgent
 			};
 
-			let request = https.get(options, response => {
+			https.get(options, response => {
 				response.pipe(file);
 
 				file.on('finish', () => {
-					file.close(() => {
-						resolve(operation);
-					});
+					file.close();
+					resolve(operation);
 				});
-			}).on('error', err => {
+			}).on('error', (err) => {
 				// Delete the .gitignore file if we created it
 				if(flags === 'w') {
-					fs.unlink(operation.path);
+					fs.unlink(operation.path, err => console.error(err.message));
 				}
 				reject(err.message);
 			});
@@ -120,7 +122,7 @@ const userAgent = 'vscode-gitignore-extension';
 
 // Read proxy configuration
 let httpConfig = vscode.workspace.getConfiguration('http');
-let proxy = httpConfig.get('proxy', undefined);
+let proxy = httpConfig.get<string | undefined>('proxy', undefined);
 
 console.log(`vscode-gitignore: using proxy ${proxy}`);
 
@@ -142,16 +144,17 @@ let client = new GitHubApi({
 let gitignoreRepository = new GitignoreRepository(client);
 
 
-let agent;
+let agent: any;
 
 function getAgent() {
-	if(agent) return agent;
+	if(agent) {
+		return agent;
+	}
 
 	// Read proxy url in following order: vscode settings, environment variables
 	proxy = proxy || process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
 
 	if(proxy) {
-		var HttpsProxyAgent = require('https-proxy-agent');
 		agent = new HttpsProxyAgent(proxy);
 	}
 
@@ -167,7 +170,7 @@ function getGitignoreFiles() {
 		// Merge the two result sets
 		.then((result) => {
 			let files: GitignoreFile[] = Array.prototype.concat.apply([], result)
-				.sort((a, b) => a.label.localeCompare(b.label));
+				.sort((a: GitignoreFile, b: GitignoreFile) => a.label.localeCompare(b.label));
 			return files;
 		});
 }
@@ -211,7 +214,7 @@ export function activate(context: vscode.ExtensionContext) {
 				return vscode.window.showQuickPick(getGitignoreFiles());
 			})
 			// Check if a .gitignore file exists
-			.then((file: GitignoreFile) => {
+			.then(file => {
 				if(!file) {
 					// Cancel
 					throw new CancellationError();
@@ -221,7 +224,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 				return new Promise<GitignoreOperation>((resolve, reject) => {
 					// Check if file exists
-					fs.stat(path, (err, stats) => {
+					fs.stat(path, (err) => {
 						if(err) {
 							// File does not exists -> we are fine to create it
 							resolve({ path: path, file: file, type: OperationType.Overwrite });
@@ -234,8 +237,10 @@ export function activate(context: vscode.ExtensionContext) {
 										reject(new CancellationError());
 										return;
 									}
+									let typedString = <keyof typeof OperationType> operation.label;
+									let type = OperationType[typedString];
 
-									resolve({ path: path, file: file, type: OperationType[operation.label] });
+									resolve({ path: path, file: file, type: type });
 								});
 						}
 					});

@@ -2,7 +2,7 @@
 	"name": "gitignore",
 	"displayName": "gitignore",
 	"description": "Language support for .gitignore files. Lets you pull .gitignore files from the https://github.com/github/gitignore repository.",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"publisher": "codezombiech",
 	"icon": "icon.png",
 	"repository": {
@@ -15,16 +15,16 @@
 	"homepage": "https://github.com/CodeZombieCH/vscode-gitignore/issues",
 	"license": "MIT",
 	"engines": {
-		"vscode": "^0.10.10"
+		"vscode": "^1.18.0"
 	},
 	"categories": [
-		"Languages",
+		"Programming Languages",
 		"Other"
 	],
 	"activationEvents": [
 		"onCommand:addgitignore"
 	],
-	"main": "./out/src/extension",
+	"main": "./out/extension",
 	"contributes": {
 		"commands": [
 			{
@@ -64,15 +64,19 @@
 		]
 	},
 	"scripts": {
-		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-		"compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
 		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test": "node ./node_modules/vscode/bin/test"
+		"test": "npm run compile && node ./node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
-		"typescript": "^1.8.5",
-		"vsce": "^1.2.3",
-		"vscode": "^0.11.8"
+		"@types/mocha": "^2.2.42",
+		"@types/node": "^8.10.38",
+		"tslint": "^5.11.0",
+		"typescript": "^2.9.2",
+		"vsce": "^1.53.0",
+		"vscode": "^1.1.21"
 	},
 	"dependencies": {
 		"github": "^6.1.0"

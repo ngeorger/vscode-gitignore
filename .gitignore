@@ -1,5 +1,4 @@
 out
 node_modules
-
-# typings
-typings
+.vscode-test/
+*.vsix

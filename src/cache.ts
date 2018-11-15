@@ -5,6 +5,10 @@
  * but I had too much fun in implementing it on my own.
  */
 
+export interface CacheItemStore {
+	[key: string]: CacheItem;
+}
+
 export class CacheItem {
 	private _key: string;
 	private _value: any;
@@ -33,11 +37,11 @@ export class Cache {
 	/**
 	 * The key value store (a simple JavaScript object)
 	 */
-	private _store: Object;
+	private _store: CacheItemStore;
 	/**
 	 * Cache expiration intervall in seconds
 	 */
-	private _cacheExpirationInterval: number
+	private _cacheExpirationInterval: number;
 
 	constructor(cacheExpirationInterval: number) {
 		this._store = {};
@@ -48,11 +52,11 @@ export class Cache {
 		this._store[item.key] = item;
 	}
 
-	public get(key: string){
+	public get(key: string) {
 		let item = this._store[key];
 
 		// Check expiration
-		if(typeof item === 'undefined'|| item.isExpired(this._cacheExpirationInterval)) {
+		if(typeof item === 'undefined' || item.isExpired(this._cacheExpirationInterval)) {
 			return undefined;
 		}
 		else {
@@ -60,11 +64,11 @@ export class Cache {
 		}
 	}
 
-	public getCacheItem(key: string): CacheItem{
+	public getCacheItem(key: string): CacheItem | undefined {
 		let item = this._store[key];
 
 		// Check expiration
-		if(typeof item === 'undefined'|| item.isExpired(this._cacheExpirationInterval)) {
+		if(typeof item === 'undefined' || item.isExpired(this._cacheExpirationInterval)) {
 			return undefined;
 		}
 		else {

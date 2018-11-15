@@ -1,14 +1,12 @@
 import * as assert from 'assert';
-import * as vscode from 'vscode';
+import * as GitHubApi from 'github';
 
-import * as gitignoreExtension from '../src/extension';
+import * as gitignoreExtension from '../extension';
 
 
 suite('GitignoreRepository', () => {
 
 	test('is getting all .gitignore files', () => {
-
-		const GitHubApi = require('github');
 
 		// Create a Github API client
 		let client = new GitHubApi({
