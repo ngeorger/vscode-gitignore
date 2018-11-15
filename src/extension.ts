@@ -17,6 +17,13 @@ enum OperationType {
 	Overwrite
 }
 
+interface GitHubRepositoryItem {
+	name: string;
+	path: string;
+	download_url: string;
+	type: string;
+}
+
 interface GitignoreOperation {
 	type: OperationType;
 	path: string;
@@ -60,11 +67,11 @@ export class GitignoreRepository {
 
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.meta['x-ratelimit-remaining']}`);
 
-				let files = response
-					.filter((file: any) => {
+				let files = (response.data as GitHubRepositoryItem[])
+					.filter(file => {
 						return (file.type === 'file' && file.name.endsWith('.gitignore'));
 					})
-					.map((file: any) => {
+					.map(file => {
 						return {
 							label: file.name.replace(/\.gitignore/, ''),
 							description: file.path,
@@ -88,7 +95,7 @@ export class GitignoreRepository {
 			let flags = operation.type === OperationType.Overwrite ? 'w' : 'a';
 			let file = fs.createWriteStream(operation.path, { flags: flags });
 
-			// If appending to the existing .gitignore file, write a NEWLINE as seperator
+			// If appending to the existing .gitignore file, write a NEWLINE as separator
 			if(flags === 'a') {
 				file.write('\n');
 			}
@@ -128,7 +135,6 @@ console.log(`vscode-gitignore: using proxy ${proxy}`);
 
 // Create a Github API client
 let client = new GitHubApi({
-	version: '3.0.0',
 	protocol: 'https',
 	host: 'api.github.com',
 	//debug: true,

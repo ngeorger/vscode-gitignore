@@ -10,7 +10,6 @@ suite('GitignoreRepository', () => {
 
 		// Create a Github API client
 		let client = new GitHubApi({
-			version: '3.0.0',
 			protocol: 'https',
 			host: 'api.github.com',
 			//debug: true,

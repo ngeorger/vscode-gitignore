@@ -79,6 +79,6 @@
 		"vscode": "^1.1.21"
 	},
 	"dependencies": {
-		"github": "^6.1.0"
+		"github": "^13.1.1"
 	}
 }
