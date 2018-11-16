@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.6.0
+
+- Updated extension to more recent vscode ecosystem
+- Updated dev dependencies
+- Updated `github` dependency
+
+
 ## v0.5.0
 
 - Implemented proxy support for requests made by this extension (resolves #1 requested by @LaurentChardin, @ibigpapa). A proxy can be set by Visual Studio Code settings (`http.proxy`) or by declaring environment variables (`HTTPS_PROXY`, `HTTP_PROXY`)
@@ -37,7 +44,7 @@
 - Fixed url to github repository
 - Added url to github issues
 - Exposed a setting named "gitignore.cacheExpirationInterval" that controls how long the `.gitignore` files retrieved from the github repository are stored in cache. Defaults to 3600 seconds.
-- Fixed cancellation of the `Add gitignore` command not beeing handled correctly
+- Fixed cancellation of the `Add gitignore` command not being handled correctly
 
 
 ## v0.1.3
