@@ -27,16 +27,33 @@ Start command palette (with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> or <kb
 ## Roadmap
 
 ### v0.1
-Basic implementation that allows to pull a single `.gitignore` file
+- Basic implementation that allows to pull a single `.gitignore` file
 
 ### v0.2
-Add language support for `.gitignore` files
+- Add language support for `.gitignore` files
 
 ### v0.3
-Support reading `.gitignore` files from subdirectories in the github/gitignore repository
+- Support reading `.gitignore` files from subdirectories in the github/gitignore repository
 
 ### v0.4
-Support adding multiple .gitignore files and merge it to a `.gitignore` file
+- Support adding multiple `.gitignore` files and merge it to a `.gitignore` file
+
+### v0.5
+- Support proxy
+
+### v0.6
+- Update extension to more recent vscode ecosystem
+- Update dependencies
+
+### v0.7
+- Support multi-root workspaces (see contribution by @hangxingliu)
+
+### v0.8
+- Further improve proxy support
+
+### v0.9
+- Switch to async/await
+- Migrate from `github` to `@octokit/rest`
 
 
 ## Changelog
