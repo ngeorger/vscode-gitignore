@@ -4,6 +4,7 @@ import {Cache, CacheItem} from './cache';
 import * as GitHubApi from 'github';
 import * as HttpsProxyAgent from 'https-proxy-agent';
 import * as fs from 'fs';
+import { join as joinPath } from 'path';
 import * as https from 'https';
 import * as url from 'url';
 
@@ -181,6 +182,26 @@ function getGitignoreFiles() {
 		});
 }
 
+function promptForPickupWorkspaceFolder(gitIgnoreFile: GitignoreFile) {
+	let folders = vscode.workspace.workspaceFolders;
+	// folders is falsy means two conditions:
+	// 1. there have not any folders opened
+	// 2. the vscode is not latest version so didn't support multi-root folder API
+	if (!folders) {
+		if (!vscode.workspace.rootPath) {
+			return Promise.reject(new CancellationError());
+		}
+		// old version VSCode
+		return Promise.resolve({ file: gitIgnoreFile, path: vscode.workspace.rootPath });
+	}
+	return vscode.window.showWorkspaceFolderPick().then(folder => {
+		if (!folder) {
+			return Promise.reject(new CancellationError());
+		}
+		return Promise.resolve({file: gitIgnoreFile, path: folder.uri.fsPath});
+	});
+}
+
 function promptForOperation() {
 	return vscode.window.showQuickPick([
 		{
@@ -219,38 +240,40 @@ export function activate(context: vscode.ExtensionContext) {
 			.then(() => {
 				return vscode.window.showQuickPick(getGitignoreFiles());
 			})
-			// Check if a .gitignore file exists
 			.then(file => {
+				// Check if user pick up a gitignore item fetched from Github
 				if(!file) {
 					// Cancel
 					throw new CancellationError();
 				}
 
-				var path = vscode.workspace.rootPath + '/.gitignore';
+				return promptForPickupWorkspaceFolder(file)
+					.then(({ path, file }) => {
+						console.log(`vscode-gitignore: add/append gitignore for directory: ${path}`);
+						path = joinPath(path, '.gitignore');
 
-				return new Promise<GitignoreOperation>((resolve, reject) => {
-					// Check if file exists
-					fs.stat(path, (err) => {
-						if(err) {
-							// File does not exists -> we are fine to create it
-							resolve({ path: path, file: file, type: OperationType.Overwrite });
-						}
-						else {
-							promptForOperation()
-								.then(operation => {
-									if(!operation) {
-										// Cancel
-										reject(new CancellationError());
-										return;
-									}
-									let typedString = <keyof typeof OperationType> operation.label;
-									let type = OperationType[typedString];
+						return new Promise<GitignoreOperation>((resolve, reject) => {
+							// Check if file exists
+							fs.stat(path, (err) => {
+								if (err) {
+									// File does not exists -> we are fine to create it
+									return resolve({ path, file, type: OperationType.Overwrite });
+								}
+								promptForOperation()
+									.then(operation => {
+										if (!operation) {
+											// Cancel
+											reject(new CancellationError());
+											return;
+										}
+										let typedString = <keyof typeof OperationType>operation.label;
+										let type = OperationType[typedString];
 
-									resolve({ path: path, file: file, type: type });
-								});
-						}
+										resolve({ path, file, type });
+									});
+							});
+						});
 					});
-				});
 			})
 			// Store the file on file system
 			.then((operation: GitignoreOperation) => {
