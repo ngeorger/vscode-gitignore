@@ -53,7 +53,7 @@ export class Cache {
 	}
 
 	public get(key: string) {
-		let item = this._store[key];
+		const item = this._store[key];
 
 		// Check expiration
 		if(typeof item === 'undefined' || item.isExpired(this._cacheExpirationInterval)) {
@@ -65,7 +65,7 @@ export class Cache {
 	}
 
 	public getCacheItem(key: string): CacheItem | undefined {
-		let item = this._store[key];
+		const item = this._store[key];
 
 		// Check expiration
 		if(typeof item === 'undefined' || item.isExpired(this._cacheExpirationInterval)) {

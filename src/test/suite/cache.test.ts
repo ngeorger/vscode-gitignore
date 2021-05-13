@@ -1,28 +1,28 @@
 import * as assert from 'assert';
 
-import {Cache, CacheItem} from '../cache';
+import {Cache, CacheItem} from '../../cache';
 
 
 suite('Cache', () => {
 
 	test('is correctly storing an item', () => {
-		let cache = new Cache(1);
+		const cache = new Cache(1);
 		cache.add(new CacheItem('foo', {foo: 'bar'}));
 
-		let cachedItem = cache.get('foo');
-		assert.deepEqual(cachedItem, {foo: 'bar'});
+		const cachedItem = cache.get('foo');
+		assert.deepStrictEqual(cachedItem, {foo: 'bar'});
 	});
 
 	test('is correctly expiring an item', (done) => {
-		let cache = new Cache(1);
+		const cache = new Cache(1);
 		cache.add(new CacheItem('foo', {foo: 'bar'}));
 
 		setTimeout(() => {
-			assert.deepEqual(cache.get('foo'), {foo: 'bar'});
+			assert.deepStrictEqual(cache.get('foo'), {foo: 'bar'});
 		}, 900);
 
 		setTimeout(() => {
-			assert.equal(cache.get('foo'), undefined);
+			assert.strictEqual(cache.get('foo'), undefined);
 		}, 1100);
 
 		setTimeout(done, 1200);
@@ -32,9 +32,9 @@ suite('Cache', () => {
 suite('CacheItem', () => {
 
 	test('is correctly setting properties', () => {
-		let cacheItem = new CacheItem('foo', 'bar');
-		assert.equal(cacheItem.key, 'foo');
-		assert.equal(cacheItem.value, 'bar');
+		const cacheItem = new CacheItem('foo', 'bar');
+		assert.strictEqual(cacheItem.key, 'foo');
+		assert.strictEqual(cacheItem.value, 'bar');
 	});
 
 });

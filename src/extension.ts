@@ -39,17 +39,17 @@ export class GitignoreRepository {
 	private cache: Cache;
 
 	constructor(private client: any) {
-		let config = vscode.workspace.getConfiguration('gitignore');
+		const config = vscode.workspace.getConfiguration('gitignore');
 		this.cache = new Cache(config.get('cacheExpirationInterval', 3600));
 	}
 
 	/**
 	 * Get all .gitignore files
 	 */
-	public getFiles(path: string = ''): Thenable<GitignoreFile[]> {
+	public getFiles(path = ''): Thenable<GitignoreFile[]> {
 		return new Promise((resolve, reject) => {
 			// If cached, return cached content
-			let item = this.cache.get('gitignore/' + path);
+			const item = this.cache.get('gitignore/' + path);
 			if(typeof item !== 'undefined') {
 				resolve(item);
 				return;
@@ -68,7 +68,7 @@ export class GitignoreRepository {
 
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.meta['x-ratelimit-remaining']}`);
 
-				let files = (response.data as GitHubRepositoryItem[])
+				const files = (response.data as GitHubRepositoryItem[])
 					.filter(file => {
 						return (file.type === 'file' && file.name.endsWith('.gitignore'));
 					})
@@ -93,15 +93,15 @@ export class GitignoreRepository {
 	 */
 	public download(operation: GitignoreOperation): Thenable<GitignoreOperation> {
 		return new Promise((resolve, reject) => {
-			let flags = operation.type === OperationType.Overwrite ? 'w' : 'a';
-			let file = fs.createWriteStream(operation.path, { flags: flags });
+			const flags = operation.type === OperationType.Overwrite ? 'w' : 'a';
+			const file = fs.createWriteStream(operation.path, { flags: flags });
 
 			// If appending to the existing .gitignore file, write a NEWLINE as separator
 			if(flags === 'a') {
 				file.write('\n');
 			}
 
-			let options: https.RequestOptions = url.parse(operation.file.url);
+			const options: https.RequestOptions = url.parse(operation.file.url);
 			options.agent = getAgent(); // Proxy
 			options.headers = {
 				'User-Agent': userAgent
@@ -117,7 +117,9 @@ export class GitignoreRepository {
 			}).on('error', (err) => {
 				// Delete the .gitignore file if we created it
 				if(flags === 'w') {
-					fs.unlink(operation.path, err => console.error(err.message));
+					fs.unlink(operation.path, err => {
+						if(err) console.error(err.message);
+					});
 				}
 				reject(err.message);
 			});
@@ -129,13 +131,13 @@ export class GitignoreRepository {
 const userAgent = 'vscode-gitignore-extension';
 
 // Read proxy configuration
-let httpConfig = vscode.workspace.getConfiguration('http');
+const httpConfig = vscode.workspace.getConfiguration('http');
 let proxy = httpConfig.get<string | undefined>('proxy', undefined);
 
 console.log(`vscode-gitignore: using proxy ${proxy}`);
 
 // Create a Github API client
-let client = new GitHubApi({
+const client = new GitHubApi({
 	protocol: 'https',
 	host: 'api.github.com',
 	//debug: true,
@@ -148,7 +150,7 @@ let client = new GitHubApi({
 });
 
 // Create gitignore repository
-let gitignoreRepository = new GitignoreRepository(client);
+const gitignoreRepository = new GitignoreRepository(client);
 
 
 let agent: any;
@@ -176,7 +178,7 @@ function getGitignoreFiles() {
 	])
 		// Merge the two result sets
 		.then((result) => {
-			let files: GitignoreFile[] = Array.prototype.concat.apply([], result)
+			const files: GitignoreFile[] = Array.prototype.concat.apply([], result)
 				.sort((a: GitignoreFile, b: GitignoreFile) => a.label.localeCompare(b.label));
 			return files;
 		});
@@ -188,7 +190,7 @@ function getGitignoreFiles() {
  * - prompting for the workspace to use when multiple workspaces are open
  */
 function resolveWorkspaceFolder(gitIgnoreFile: GitignoreFile) {
-	let folders = vscode.workspace.workspaceFolders;
+	const folders = vscode.workspace.workspaceFolders;
 	// folders being falsy can have two reasons:
 	// 1. no folder (workspace) open
 	//    --> should never be the case as already handled before
@@ -234,10 +236,11 @@ function showSuccessMessage(operation: GitignoreOperation) {
 	}
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function activate(context: vscode.ExtensionContext) {
 	console.log('vscode-gitignore: extension is now active!');
 
-	let disposable = vscode.commands.registerCommand('addgitignore', () => {
+	const disposable = vscode.commands.registerCommand('addgitignore', () => {
 		// Check if workspace open
 		if(!vscode.workspace.workspaceFolders) {
 			vscode.window.showErrorMessage('No workspace/directory open');
@@ -279,8 +282,8 @@ export function activate(context: vscode.ExtensionContext) {
 									reject(new CancellationError());
 									return;
 								}
-								let typedString = <keyof typeof OperationType>operation.label;
-								let type = OperationType[typedString];
+								const typedString = <keyof typeof OperationType>operation.label;
+								const type = OperationType[typedString];
 
 								resolve({ path, file, type });
 							});
@@ -309,6 +312,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 // this method is called when your extension is deactivated
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function deactivate() {
 	console.log('vscode-gitignore: extension is now deactivated!');
 }
