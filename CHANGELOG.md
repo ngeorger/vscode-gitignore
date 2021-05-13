@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.0
+
+- Implemented supported for multi-root workspaces (contributed by [@hangxingliu](https://github.com/hangxingliu)
+- Upgraded dependencies
+
+
 ## v0.6.0
 
 - Updated extension to more recent vscode ecosystem
