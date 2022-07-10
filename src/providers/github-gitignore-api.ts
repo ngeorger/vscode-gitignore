@@ -13,7 +13,7 @@ import { getAgent, getDefaultHeaders } from '../http-client';
  * https://docs.github.com/en/rest/gitignore
  */
 export class GithubGitignoreApiProvider implements GitignoreProvider {
-	
+
 	constructor(private cache: Cache) {
 	}
 
@@ -22,7 +22,7 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 	 */
 	public getTemplates(): PromiseLike<GitignoreTemplate[]> {
 		// If cached, return cached content
-		const item: GitignoreTemplate[] = this.cache.get('gitignore');
+		const item = this.cache.get('gitignore') as GitignoreTemplate[];
 		if(typeof item !== 'undefined') {
 			return Promise.resolve<GitignoreTemplate[]>(item);
 		}
@@ -41,6 +41,7 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 				headers: {...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3+json'},
 			};
 			const req = https.request(options, res => {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const data : any[] = [];
 
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${res.headers['x-ratelimit-remaining']}`);
@@ -51,11 +52,11 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 				res.on('end', () => {
 					const responseBody: string = Buffer.concat(data).toString();
 
-					if(res.statusCode != 200) {
+					if(res.statusCode !== 200) {
 						return reject(responseBody);
 					}
 
-					const templatesRaw: string[] = JSON.parse(responseBody);
+					const templatesRaw = JSON.parse(responseBody) as string[];
 					const templates = templatesRaw.map(t => <GitignoreTemplate>{ name: t, path: t});
 
 					// Cache the retrieved gitignore files
@@ -102,8 +103,8 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 			const req = https.request(options, response => {
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.headers['x-ratelimit-remaining']}`);
 
-				if(response.statusCode != 200) {
-					return reject(new Error('Download failed with status code ' + response.statusCode));
+				if(response.statusCode !== 200) {
+					return reject(new Error(`Download failed with status code ${response.statusCode}`));
 				}
 
 				response.pipe(file);
@@ -116,7 +117,9 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 				// Delete the .gitignore file if we created it
 				if(flags === 'w') {
 					fs.unlink(operation.path, err => {
-						if(err) console.error(err.message);
+						if(err) {
+							console.error(err.message);
+						}
 					});
 				}
 				return reject(err.message);
@@ -127,7 +130,7 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 	}
 
 	public downloadToStream(operation: GitignoreOperation, stream: WriteStream): Thenable<GitignoreOperation> {
-		if(operation.template == null) {
+		if(operation.template === null) {
 			throw new Error('Template cannot be null');
 		}
 
@@ -149,8 +152,8 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 			const req = https.request(options, response => {
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.headers['x-ratelimit-remaining']}`);
 
-				if(response.statusCode != 200) {
-					return reject(new Error('Download failed with status code ' + response.statusCode));
+				if(response.statusCode !== 200) {
+					return reject(new Error(`Download failed with status code ${response.statusCode}`));
 				}
 
 				response.pipe(stream);
@@ -163,7 +166,9 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 				// Delete the .gitignore file if we created it
 				if(operation.type === GitignoreOperationType.Overwrite) {
 					fs.unlink(operation.path, err => {
-						if(err) console.error(err.message);
+						if(err) {
+							console.error(err.message);
+						}
 					});
 				}
 				return reject(err.message);

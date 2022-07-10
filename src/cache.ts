@@ -11,24 +11,24 @@ export interface CacheItemStore {
 
 export class CacheItem {
 	private _key: string;
-	private _value: any;
+	private _value: unknown;
 	private storeDate: Date;
 
-	get key(): any {
+	get key() {
 		return this._key;
 	}
 
-	get value(): any {
+	get value() {
 		return this._value;
 	}
 
-	constructor(key: string, value: any) {
+	constructor(key: string, value: unknown) {
 		this._key = key;
 		this._value = value;
 		this.storeDate = new Date();
 	}
 
-	public isExpired(expirationInterval: number): boolean {
+	public isExpired(expirationInterval: number) {
 		return this.storeDate.getTime() + expirationInterval * 1000 < Date.now();
 	}
 }
@@ -48,11 +48,11 @@ export class Cache {
 		this._cacheExpirationInterval = cacheExpirationInterval;
 	}
 
-	public add(item: CacheItem): void {
+	public add(item: CacheItem) {
 		this._store[item.key] = item;
 	}
 
-	public get(key: string): any {
+	public get(key: string) {
 		const item = this._store[key];
 
 		// Check expiration
@@ -64,7 +64,7 @@ export class Cache {
 		}
 	}
 
-	public getCacheItem(key: string): CacheItem | undefined {
+	public getCacheItem(key: string) {
 		const item = this._store[key];
 
 		// Check expiration

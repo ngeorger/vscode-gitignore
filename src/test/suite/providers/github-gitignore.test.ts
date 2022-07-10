@@ -13,7 +13,9 @@ import { GithubGitignoreRepositoryProvider } from '../../../providers/github-git
 function fileExits(path: string): Promise<boolean> {
 	return new Promise((resolve) => {
 		fs.stat(path, (err) => {
-			if(err) return resolve(false);
+			if(err) {
+				return resolve(false);
+			}
 			return resolve(true);
 		});
 	});
@@ -22,7 +24,9 @@ function fileExits(path: string): Promise<boolean> {
 function createTmpTestDir(prefix: string): Promise<string> {
 	return new Promise((resolve, reject) => {
 		fs.mkdtemp(path.join(os.tmpdir(), prefix), (err, directory) => {
-			if (err) reject(err);
+			if (err) {
+				reject(err);
+			}
 			return resolve(directory);
 		});
 	});
@@ -49,7 +53,9 @@ class MemoryWritable extends Writable {
 		super();
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	_write(chunk: any, _encoding: BufferEncoding, callback: (error?: Error | null) => void): void {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 		this.data += chunk.toString();
 		callback();
 	}
@@ -84,7 +90,7 @@ providers.forEach(provider => {
 
 			// Cleanup
 			if(fs.existsSync(path)) {
-				fs.unlinkSync(path)
+				fs.unlinkSync(path);
 			}
 
 			const operation = <GitignoreOperation>{
@@ -102,13 +108,13 @@ providers.forEach(provider => {
 			const content = fs.readFileSync(operation.path, {encoding: 'utf8'});
 			const lines = content.split(/\r?\n/);
 
-			assert(lines[0] === '# Prerequisites')
-			assert(lines[1] === '*.d')
-			assert(lines[2] === '')
+			assert(lines[0] === '# Prerequisites');
+			assert(lines[1] === '*.d');
+			assert(lines[2] === '');
 
 			// Cleanup
 			if(fs.existsSync(path)) {
-				fs.unlinkSync(path)
+				fs.unlinkSync(path);
 			}
 		});
 
@@ -130,9 +136,9 @@ providers.forEach(provider => {
 			const content = memoryStream.content;
 			const lines = content.split(/\r?\n/);
 
-			assert(lines[0] === '# Byte-compiled / optimized / DLL files')
-			assert(lines[1] === '__pycache__/')
-			assert(lines[2] === '*.py[cod]')
+			assert(lines[0] === '# Byte-compiled / optimized / DLL files');
+			assert(lines[1] === '__pycache__/');
+			assert(lines[2] === '*.py[cod]');
 		});
 
 		// Test for bug #21
@@ -156,11 +162,11 @@ providers.forEach(provider => {
 			const lines = content.split(/\r?\n/);
 
 			// Ensure the content is not the name of the linked file
-			assert(lines[0] !== 'Leiningen.gitignore')
+			assert(lines[0] !== 'Leiningen.gitignore');
 
-			assert(lines[0] === 'pom.xml')
-			assert(lines[1] === 'pom.xml.asc')
-			assert(lines[2] === '*.jar')
+			assert(lines[0] === 'pom.xml');
+			assert(lines[1] === 'pom.xml.asc');
+			assert(lines[2] === '*.jar');
 		});
 
 		test('can download global a template to a writable stream', async () => {
@@ -187,9 +193,9 @@ providers.forEach(provider => {
 			const content = memoryStream.content;
 			const lines = content.split(/\r?\n/);
 
-			assert(lines[0] === '.vscode/*')
-			assert(lines[1] === '!.vscode/settings.json')
-			assert(lines[2] === '!.vscode/tasks.json')
+			assert(lines[0] === '.vscode/*');
+			assert(lines[1] === '!.vscode/settings.json');
+			assert(lines[2] === '!.vscode/tasks.json');
 		});
 
 		// Test for bug #21
@@ -219,11 +225,11 @@ providers.forEach(provider => {
 			const lines = content.split(/\r?\n/);
 
 			// Ensure the content is not the name of the linked file
-			assert(lines[0] !== 'MATLAB.gitignore')
+			assert(lines[0] !== 'MATLAB.gitignore');
 
-			assert(lines[0] === '# Windows default autosave extension')
-			assert(lines[1] === '*.asv')
-			assert(lines[2] === '')
+			assert(lines[0] === '# Windows default autosave extension');
+			assert(lines[1] === '*.asv');
+			assert(lines[2] === '');
 		});
 	});
 

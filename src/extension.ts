@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { join as joinPath } from 'path';
 
 import { Cache } from './cache';
-import { GitignoreTemplate, GitignoreOperation, GitignoreOperationType, GitignoreProvider } from './interfaces'
+import { GitignoreTemplate, GitignoreOperation, GitignoreOperationType, GitignoreProvider } from './interfaces';
 import { GithubGitignoreRepositoryProvider } from './providers/github-gitignore-repository';
 
 
@@ -100,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
 					description: t.path,
 					url: t.download_url,
 					template: t
-				})
+				});
 				return vscode.window.showQuickPick(items);
 
 			})
@@ -155,7 +155,7 @@ export function activate(context: vscode.ExtensionContext) {
 					return;
 				}
 
-				vscode.window.showErrorMessage(reason);
+				vscode.window.showErrorMessage(String(reason));
 			});
 	});
 

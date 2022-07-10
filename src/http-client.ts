@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as HttpsProxyAgent from 'https-proxy-agent';
+import { Agent } from 'http';
 
 
 export const userAgent = 'vscode-gitignore-extension';
@@ -20,9 +21,9 @@ export function getProxyConfig() : string | undefined {
 }
 
 
-let agent: any;
+let agent: Agent | undefined;
 
-export function getAgent() : any {
+export function getAgent() {
 	if(agent) {
 		return agent;
 	}
@@ -35,7 +36,7 @@ export function getAgent() : any {
 	return agent;
 }
 
-export function getAuthorizationHeaderValue() : string | null {
+export function getAuthorizationHeaderValue() {
 	if(process.env.GITHUB_AUTHORIZATION) {
 		return process.env.GITHUB_AUTHORIZATION;
 	}
@@ -45,7 +46,7 @@ export function getAuthorizationHeaderValue() : string | null {
 	}
 }
 
-export function getDefaultHeaders() : Record<string, string> {
+export function getDefaultHeaders() {
 	let headers: Record<string, string> = {
 		'User-Agent': userAgent
 	};
@@ -54,7 +55,7 @@ export function getDefaultHeaders() : Record<string, string> {
 	const authorizationHeaderValue = getAuthorizationHeaderValue();
 	if(authorizationHeaderValue) {
 		console.debug('vscode-gitignore: setting authorization header');
-		headers = {...headers, 'Authorization': authorizationHeaderValue}
+		headers = {...headers, 'Authorization': authorizationHeaderValue};
 	}
 
 	return headers;

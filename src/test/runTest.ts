@@ -17,9 +17,9 @@ async function main() {
 
 		/**
 		 * Use 1.18.0 release for testing (lowers API level supported)
-		 * 
+		 *
 		 * WARNING: This won't work with current operating systems
-		 * 
+		 *
 		 * Debian 11:
 		 * 1) first it will fail with
 		 *        error while loading shared libraries: libgconf-2.so.4: cannot open shared object file: No such file or directory
@@ -39,4 +39,5 @@ async function main() {
 	}
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 main();

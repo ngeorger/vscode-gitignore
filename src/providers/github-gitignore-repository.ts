@@ -5,7 +5,7 @@ import { WriteStream } from 'fs';
 
 import { getAgent, getDefaultHeaders } from '../http-client';
 import { Cache, CacheItem } from '../cache';
-import { GitignoreProvider, GitignoreTemplate, GitignoreOperation, GitignoreOperationType } from '../interfaces'
+import { GitignoreProvider, GitignoreTemplate, GitignoreOperation, GitignoreOperationType } from '../interfaces';
 
 
 interface GithubRepositoryItem {
@@ -20,7 +20,7 @@ interface GithubRepositoryItem {
  * https://docs.github.com/en/rest/repos/contents
  */
 export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
-	
+
 	constructor(private cache: Cache) {
 	}
 
@@ -35,7 +35,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 		])
 			// Merge the two result sets
 			.then((result) => {
-				const files: GitignoreTemplate[] = Array.prototype.concat.apply([], result)
+				const files = (Array.prototype.concat.apply([], result) as GitignoreTemplate[])
 					.sort((a: GitignoreTemplate, b: GitignoreTemplate) => a.name.localeCompare(b.name));
 				return files;
 			});
@@ -47,7 +47,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 	private getFiles(path = ''): Thenable<GitignoreTemplate[]> {
 		return new Promise((resolve, reject) => {
 			// If cached, return cached content
-			const item = this.cache.get('gitignore/' + path);
+			const item = this.cache.get('gitignore/' + path) as GitignoreTemplate[];
 			if(typeof item !== 'undefined') {
 				resolve(item);
 				return;
@@ -67,6 +67,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 				headers: {...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3+json'},
 			};
 			const req = https.request(options, res => {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const data : any[] = [];
 
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${res.headers['x-ratelimit-remaining']}`);
@@ -78,11 +79,11 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 				res.on('end', () => {
 					const responseBody: string = Buffer.concat(data).toString();
 
-					if(res.statusCode != 200) {
+					if(res.statusCode !== 200) {
 						return reject(responseBody);
 					}
 
-					const items: GithubRepositoryItem[] = JSON.parse(responseBody);
+					const items = JSON.parse(responseBody) as GithubRepositoryItem[];
 
 					const templates = items
 						.filter(item => {
@@ -139,8 +140,8 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 			const req = https.request(options, response => {
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.headers['x-ratelimit-remaining']}`);
 
-				if(response.statusCode != 200) {
-					return reject(new Error('Download failed with status code ' + response.statusCode));
+				if(response.statusCode !== 200) {
+					return reject(new Error(`Download failed with status code ${response.statusCode}`));
 				}
 
 				response.pipe(file);
@@ -153,7 +154,9 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 				// Delete the .gitignore file if we created it
 				if(flags === 'w') {
 					fs.unlink(operation.path, err => {
-						if(err) console.error(err.message);
+						if(err) {
+							console.error(err.message);
+						}
 					});
 				}
 				reject(err.message);
@@ -167,7 +170,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 	 * Downloads a .gitignore from the repository to the path passed
 	 */
 	public downloadToStream(operation: GitignoreOperation, stream: WriteStream): Thenable<GitignoreOperation> {
-		if(operation.template == null) {
+		if(operation.template === null) {
 			throw new Error('Template cannot be null');
 		}
 
@@ -189,8 +192,8 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 			const req = https.request(options, response => {
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.headers['x-ratelimit-remaining']}`);
 
-				if(response.statusCode != 200) {
-					return reject(new Error('Download failed with status code ' + response.statusCode));
+				if(response.statusCode !== 200) {
+					return reject(new Error(`Download failed with status code ${response.statusCode}`));
 				}
 
 				response.pipe(stream);

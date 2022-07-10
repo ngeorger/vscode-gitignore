@@ -3,16 +3,28 @@
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
 		"ecmaVersion": 6,
-		"sourceType": "module"
+		"sourceType": "module",
+		"project": ["./tsconfig.json"]
 	},
 	"plugins": [
 		"@typescript-eslint"
 	],
 	"extends": [
 		"eslint:recommended",
-		"plugin:@typescript-eslint/recommended"
+		"plugin:@typescript-eslint/recommended",
+		"plugin:@typescript-eslint/recommended-requiring-type-checking"
 	],
-	"rules": {},
+	"rules": {
+		"semi": "off",
+		"@typescript-eslint/semi": [
+			"warn"
+		],
+		"curly": "warn",
+		"eqeqeq": "warn",
+		"no-throw-literal": "warn",
+		"@typescript-eslint/restrict-template-expressions": "off",
+		"@typescript-eslint/no-floating-promises": "warn"
+	},
 	"ignorePatterns": [
 		"out",
 		"dist",
