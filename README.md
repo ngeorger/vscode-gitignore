@@ -18,8 +18,8 @@ Start command palette (with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> or <kb
 
 ```JavaScript
 {
-	// Number of seconds the list of `.gitignore` files retrieved from github will be cached
-	"gitignore.cacheExpirationInterval": 3600
+    // Number of seconds the list of `.gitignore` files retrieved from github will be cached
+    "gitignore.cacheExpirationInterval": 3600
 }
 ```
 
@@ -58,12 +58,12 @@ Start command palette (with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> or <kb
 
 ## Changelog
 
-See CHANGELOG.md
+See [CHANGELOG.md](CHANGELOG.md)
 
 
 ## License
 
-See LICENSE file
+See [LICENSE](LICENSE) file
 
 
 ## Credits
