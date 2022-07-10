@@ -6,59 +6,59 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Extension (no workspace)",
+			"name": "Run Extension (no workspace)",
 			"type": "extensionHost",
 			"request": "launch",
-			"runtimeExecutable": "${execPath}",
 			"args": [
 				"${workspaceFolder}/test-workspaces/single-file/file.txt",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "npm: watch"
+			"preLaunchTask": "${defaultBuildTask}"
 		},
 		{
-			"name": "Extension (single root workspace)",
+			"name": "Run Extension (single root workspace)",
 			"type": "extensionHost",
 			"request": "launch",
-			"runtimeExecutable": "${execPath}",
 			"args": [
 				"${workspaceFolder}/test-workspaces/single-root",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "npm: watch"
+			"preLaunchTask": "${defaultBuildTask}"
 		},
 		{
-			"name": "Extension (multi root workspace)",
+			"name": "Run Extension (multi root workspace)",
 			"type": "extensionHost",
 			"request": "launch",
-			"runtimeExecutable": "${execPath}",
 			"args": [
 				"${workspaceFolder}/test-workspaces/multi-root/test.code-workspace",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "npm: watch"
+			"preLaunchTask": "${defaultBuildTask}"
 		},
 		{
 			"name": "Extension Tests",
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
+				"${workspaceFolder}/test-workspaces/single-root",
+				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/test/**/*.js"
+				"${workspaceFolder}/out/**/*.js",
+				"${workspaceFolder}/dist/**/*.js"
 			],
-			"preLaunchTask": "${defaultBuildTask}"
+			"preLaunchTask": "tasks: watch-tests"
 		}
 	]
 }

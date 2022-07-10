@@ -1,8 +1,5 @@
 {
-	"extends": [
-		"eslint:recommended",
-		"plugin:@typescript-eslint/recommended"
-	],
+	"root": true,
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
 		"ecmaVersion": 6,
@@ -11,8 +8,11 @@
 	"plugins": [
 		"@typescript-eslint"
 	],
-	"rules": {
-	},
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended"
+	],
+	"rules": {},
 	"ignorePatterns": [
 		"out",
 		"dist",

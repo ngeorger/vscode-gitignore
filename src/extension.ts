@@ -81,7 +81,7 @@ function showSuccessMessage(operation: GitignoreOperation) {
 export function activate(context: vscode.ExtensionContext) {
 	console.log('vscode-gitignore: extension is now active!');
 
-	const disposable = vscode.commands.registerCommand('addgitignore', () => {
+	const disposable = vscode.commands.registerCommand('gitignore.addgitignore', () => {
 		// Check if workspace open
 		if(!vscode.workspace.workspaceFolders) {
 			vscode.window.showErrorMessage('No workspace/directory open');

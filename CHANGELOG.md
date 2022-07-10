@@ -2,7 +2,7 @@
 
 ## v0.7.0
 
-- Implemented supported for multi-root workspaces (contributed by [@hangxingliu](https://github.com/hangxingliu)
+- Implemented supported for multi-root workspaces (contributed by [@hangxingliu](https://github.com/hangxingliu))
 - Upgraded dependencies
 
 

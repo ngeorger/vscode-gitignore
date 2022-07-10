@@ -1,5 +1,7 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
+import path = require('path');
+import os = require('os');
 import { Writable } from 'stream';
 
 import { Cache } from '../../../cache';
@@ -15,6 +17,16 @@ function fileExits(path: string): Promise<boolean> {
 		});
 	});
 }
+
+function createTmpTestDir(prefix: string): Promise<string> {
+	return new Promise((resolve, reject) => {
+		fs.mkdtemp(path.join(os.tmpdir(), prefix), (err, directory) => {
+			if (err) reject(err);
+			return resolve(directory);
+		});
+	});
+}
+
 
 const providers: GitignoreProvider[] = [
 	new GithubGitignoreRepositoryProvider(new Cache(0)),
@@ -66,7 +78,8 @@ providers.forEach(provider => {
 
 		test('can download a template to a file', async () => {
 			// TODO: Check content of file
-			const path = provider.constructor.name + '.gitignore';
+			const testBaseDir = await createTmpTestDir(provider.constructor.name);
+			const path = `${testBaseDir}/.gitignore`;
 
 			// Cleanup
 			if(fs.existsSync(path)) {
@@ -94,6 +107,11 @@ providers.forEach(provider => {
 			assert(lines[0] === 'pom.xml')
 			assert(lines[1] === 'pom.xml.asc')
 			assert(lines[2] === '*.jar')
+
+			// Cleanup
+			if(fs.existsSync(path)) {
+				fs.unlinkSync(path)
+			}
 		});
 
 		test('can download a root template to a writable stream', async () => {
@@ -124,6 +142,12 @@ providers.forEach(provider => {
 		});
 
 		test('can download global a template to a writable stream', async () => {
+			if(provider.constructor.name === GithubGitignoreApiProvider.name) {
+				// Skip test for GithubGitignoreApiProvider
+				// Not supported by the API
+				return;
+			}
+
 			const memoryStream = new MemoryWritable();
 
 			const path = provider.constructor.name + '.gitignore';

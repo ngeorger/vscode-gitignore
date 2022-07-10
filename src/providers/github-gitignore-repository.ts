@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as url from 'url';
 import { WriteStream } from 'fs';
 
-import { userAgent, getAgent } from '../http-client';
+import { getAgent, getDefaultHeaders } from '../http-client';
 import { Cache, CacheItem } from '../cache';
 import { GitignoreProvider, GitignoreTemplate, GitignoreOperation, GitignoreOperationType } from '../interfaces'
 
@@ -20,11 +20,7 @@ interface GithubRepositoryItem {
  * https://docs.github.com/en/rest/repos/contents
  */
 export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
-	private readonly defaultHeaders = {
-		'User-Agent': userAgent,
-		//'Authorization': getAuthorizationHeaderValue()
-	}
-
+	
 	constructor(private cache: Cache) {
 	}
 
@@ -68,7 +64,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 				method: 'GET',
 				hostname: fullUrl.hostname,
 				path: fullUrl.pathname,
-				headers: {...this.defaultHeaders, 'Accept': 'application/vnd.github.v3+json'},
+				headers: {...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3+json'},
 			};
 			const req = https.request(options, res => {
 				const data : any[] = [];
@@ -137,7 +133,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 				method: 'GET',
 				hostname: fullUrl.hostname,
 				path: fullUrl.pathname,
-				headers: {...this.defaultHeaders, 'Accept': 'application/vnd.github.v3.raw'}
+				headers: {...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3.raw'}
 			};
 
 			const req = https.request(options, response => {
@@ -187,7 +183,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 				method: 'GET',
 				hostname: fullUrl.hostname,
 				path: fullUrl.pathname,
-				headers: {...this.defaultHeaders, 'Accept': 'application/vnd.github.v3.raw'}
+				headers: {...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3.raw'}
 			};
 
 			const req = https.request(options, response => {

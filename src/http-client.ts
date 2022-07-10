@@ -11,7 +11,10 @@ export function getProxyConfig() : string | undefined {
 	// Read proxy url in following order: vscode settings, environment variables
 	const proxy = httpConfig.get<string | undefined>('proxy', undefined) || process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
 
-	console.log(`vscode-gitignore: using proxy ${proxy}`);
+	if(proxy)
+	{
+		console.log(`vscode-gitignore: using proxy ${proxy}`);
+	}
 
 	return proxy;
 }
@@ -33,7 +36,13 @@ export function getAgent() : any {
 }
 
 export function getAuthorizationHeaderValue() : string | null {
-	return null;
+	if(process.env.GITHUB_AUTHORIZATION) {
+		return process.env.GITHUB_AUTHORIZATION;
+	}
+	else
+	{
+		return null;
+	}
 }
 
 export function getDefaultHeaders() : Record<string, string> {
@@ -44,6 +53,7 @@ export function getDefaultHeaders() : Record<string, string> {
 	// Add authorization header if authorization is available
 	const authorizationHeaderValue = getAuthorizationHeaderValue();
 	if(authorizationHeaderValue) {
+		console.debug('vscode-gitignore: setting authorization header');
 		headers = {...headers, 'Authorization': authorizationHeaderValue}
 	}
 
