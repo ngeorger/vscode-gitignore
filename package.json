@@ -2,7 +2,7 @@
 	"name": "gitignore",
 	"displayName": "gitignore",
 	"description": "Lets you pull .gitignore templates from the https://github.com/github/gitignore repository. Language support for .gitignore files.",
-	"version": "0.7.0",
+	"version": "0.8.0-alpha.1",
 	"author": "Marc-André Bühler",
 	"publisher": "codezombiech",
 	"icon": "icon.png",
@@ -78,18 +78,18 @@
 	"devDependencies": {
 		"@types/glob": "^7.1.3",
 		"@types/mocha": "^8.2.2",
-		"@types/node": "^14.0.0",
+		"@types/node": "^14.17.1",
 		"@types/vscode": "1.18.0",
-		"@typescript-eslint/eslint-plugin": "^4.23.0",
-		"@typescript-eslint/parser": "^4.23.0",
-		"eslint": "^7.26.0",
+		"@typescript-eslint/eslint-plugin": "^4.26.0",
+		"@typescript-eslint/parser": "^4.26.0",
+		"eslint": "^7.27.0",
 		"glob": "^7.1.7",
 		"mocha": "^8.4.0",
-		"typescript": "^4.2.4",
-		"vsce": "^1.88.0",
+		"typescript": "^4.3.2",
+		"vsce": "^1.91.0",
 		"vscode-test": "^1.5.2"
 	},
 	"dependencies": {
-		"github": "^13.1.1"
+		"https-proxy-agent": "^4.0.0"
 	}
 }

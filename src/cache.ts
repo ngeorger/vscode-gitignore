@@ -48,11 +48,11 @@ export class Cache {
 		this._cacheExpirationInterval = cacheExpirationInterval;
 	}
 
-	public add(item: CacheItem) {
+	public add(item: CacheItem): void {
 		this._store[item.key] = item;
 	}
 
-	public get(key: string) {
+	public get(key: string): any {
 		const item = this._store[key];
 
 		// Check expiration
