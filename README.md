@@ -5,8 +5,8 @@ A extension for Visual Studio Code that assists you in working with `.gitignore`
 
 ## Features
 
+- Add local `.gitignore` file by pulling .gitignore templates from the [github/gitignore](https://github.com/github/gitignore) repository
 - Language support for `.gitignore` files
-- Add local `.gitignore` by pulling file from the the [github/gitignore](https://github.com/github/gitignore) repository.
 
 
 ## Usage
