@@ -16,12 +16,34 @@ Start command palette (with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> or <kb
 
 ## Settings
 
+### Visual Studio Code Settings
+
 ```JavaScript
 {
     // Number of seconds the list of `.gitignore` files retrieved from github will be cached
     "gitignore.cacheExpirationInterval": 3600
 }
 ```
+
+### Authenticated GitHub API Requests
+
+This extension makes API calls to the [GitHub REST API](https://docs.github.com/en/rest) which are subject to [rate limits](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting).
+
+By default, requests sent to the GitHub REST API are unauthenticated. Although the rate limit for unauthenticated requests is low, this should usually not be an issue because of caching and the most likely infrequent usage of this extension.
+
+If you reach the rate limit (e.g. because you work inside a corporate network), you can switch to [authenticated requests](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#authentication) by setting the `GITHUB_AUTHORIZATION` environment variable.
+
+#### Examples
+
+Using a [personal access token](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#oauth2-token-sent-in-a-header):
+
+	export GITHUB_AUTHORIZATION='Token <oauth2-token>'
+	code
+
+Using an [OAuth2 key/secret](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#oauth2-keysecret)
+
+	export GITHUB_AUTHORIZATION='Basic <base65-encoded-key-secret>'
+	code
 
 
 ## Roadmap
