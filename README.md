@@ -71,11 +71,14 @@ Using an [OAuth2 key/secret](https://docs.github.com/en/rest/overview/resources-
 - Support multi-root workspaces (see contribution by @hangxingliu)
 
 ### v0.8
-- Further improve proxy support
+- Fix bugs
+- Remove `github` dependency
+- Update dependencies
 
-### v0.9
+### v0.x
 - Switch to async/await
-- Migrate from `github` to `@octokit/rest`
+- Further improve proxy support
+- Add unit tests with active proxy
 
 
 ## Changelog
