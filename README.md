@@ -1,4 +1,4 @@
-# gitignore extension for Visual Studio Code
+# gitignore Extension for Visual Studio Code
 
 A extension for Visual Studio Code that assists you in working with `.gitignore` files.
 
@@ -94,4 +94,3 @@ See [LICENSE](LICENSE) file
 ## Credits
 
 Icon based on the Git logo by Jason Long
-
