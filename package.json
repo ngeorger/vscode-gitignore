@@ -2,7 +2,7 @@
 	"name": "gitignore",
 	"displayName": "gitignore",
 	"description": "Lets you pull .gitignore templates from the https://github.com/github/gitignore repository. Language support for .gitignore files.",
-	"version": "0.8.0-alpha.1",
+	"version": "0.8.0",
 	"author": "Marc-André Bühler",
 	"publisher": "codezombiech",
 	"icon": "icon.png",
@@ -97,5 +97,11 @@
 	},
 	"dependencies": {
 		"https-proxy-agent": "^4.0.0"
+	},
+	"__metadata": {
+		"id": "3e891cf9-53cb-49a3-8d01-8f0b1f0afb29",
+		"publisherDisplayName": "CodeZombie",
+		"publisherId": "930310c4-ca8b-4e80-9d19-2b1507b2af61",
+		"isPreReleaseVersion": false
 	}
 }
