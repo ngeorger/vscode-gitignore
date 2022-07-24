@@ -9,9 +9,9 @@ export interface GitignoreTemplate {
 }
 
 export interface GitignoreProvider {
-	getTemplates(): Thenable<GitignoreTemplate[]>;
-	download(operation: GitignoreOperation): Thenable<GitignoreOperation>;
-	downloadToStream(operation: GitignoreOperation, stream: WriteStream): Thenable<GitignoreOperation>;
+	getTemplates(): Promise<GitignoreTemplate[]>;
+	download(operation: GitignoreOperation): Promise<void>;
+	downloadToStream(operation: GitignoreOperation, stream: WriteStream): Promise<void>;
 }
 
 export enum GitignoreOperationType {

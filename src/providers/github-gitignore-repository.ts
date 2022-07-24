@@ -27,24 +27,21 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 	/**
 	 * Get all .gitignore templates
 	 */
-	public getTemplates(): PromiseLike<GitignoreTemplate[]> {
+	public async getTemplates(): Promise<GitignoreTemplate[]> {
 		// Get lists of .gitignore files from Github
-		return Promise.all([
+		const result = await Promise.all([
 			this.getFiles(),
 			this.getFiles('Global')
-		])
-			// Merge the two result sets
-			.then((result) => {
-				const files = (Array.prototype.concat.apply([], result) as GitignoreTemplate[])
-					.sort((a: GitignoreTemplate, b: GitignoreTemplate) => a.name.localeCompare(b.name));
-				return files;
-			});
+		]);
+		const files = (Array.prototype.concat.apply([], result) as GitignoreTemplate[])
+			.sort((a: GitignoreTemplate, b: GitignoreTemplate) => a.name.localeCompare(b.name));
+		return files;
 	}
 
 	/**
 	 * Get all .gitignore files in a directory of the repository
 	 */
-	private getFiles(path = ''): Thenable<GitignoreTemplate[]> {
+	private getFiles(path = ''): Promise<GitignoreTemplate[]> {
 		return new Promise((resolve, reject) => {
 			// If cached, return cached content
 			const item = this.cache.get('gitignore/' + path) as GitignoreTemplate[];
@@ -113,7 +110,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 	/**
 	 * Downloads a .gitignore from the repository to the path passed
 	 */
-	public download(operation: GitignoreOperation): Thenable<GitignoreOperation> {
+	public download(operation: GitignoreOperation): Promise<void> {
 		return new Promise((resolve, reject) => {
 			const flags = operation.type === GitignoreOperationType.Overwrite ? 'w' : 'a';
 			const file = fs.createWriteStream(operation.path, { flags: flags });
@@ -148,7 +145,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 
 				file.on('finish', () => {
 					file.close();
-					resolve(operation);
+					resolve();
 				});
 			}).on('error', (err) => {
 				// Delete the .gitignore file if we created it
@@ -169,7 +166,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 	/**
 	 * Downloads a .gitignore from the repository to the path passed
 	 */
-	public downloadToStream(operation: GitignoreOperation, stream: WriteStream): Thenable<GitignoreOperation> {
+	public downloadToStream(operation: GitignoreOperation, stream: WriteStream): Promise<void> {
 		if(operation.template === null) {
 			throw new Error('Template cannot be null');
 		}
@@ -200,7 +197,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 
 				stream.on('finish', () => {
 					stream.close();
-					resolve(operation);
+					resolve();
 				});
 			}).on('error', (err) => {
 				reject(err.message);

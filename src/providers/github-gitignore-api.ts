@@ -20,7 +20,7 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 	/**
 	 * Get all .gitignore templates
 	 */
-	public getTemplates(): PromiseLike<GitignoreTemplate[]> {
+	public getTemplates(): Promise<GitignoreTemplate[]> {
 		// If cached, return cached content
 		const item = this.cache.get('gitignore') as GitignoreTemplate[];
 		if(typeof item !== 'undefined') {
@@ -76,7 +76,7 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 	/**
 	 * Downloads a .gitignore from the repository to the path passed
 	 */
-	public download(operation: GitignoreOperation): Thenable<GitignoreOperation> {
+	public download(operation: GitignoreOperation): Promise<void> {
 		return new Promise((resolve, reject) => {
 			const flags = operation.type === GitignoreOperationType.Overwrite ? 'w' : 'a';
 			const file = fs.createWriteStream(operation.path, { flags: flags });
@@ -111,7 +111,7 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 
 				file.on('finish', () => {
 					file.close();
-					return resolve(operation);
+					return resolve();
 				});
 			}).on('error', (err) => {
 				// Delete the .gitignore file if we created it
@@ -129,7 +129,7 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 		});
 	}
 
-	public downloadToStream(operation: GitignoreOperation, stream: WriteStream): Thenable<GitignoreOperation> {
+	public downloadToStream(operation: GitignoreOperation, stream: WriteStream): Promise<void> {
 		if(operation.template === null) {
 			throw new Error('Template cannot be null');
 		}
@@ -160,7 +160,7 @@ export class GithubGitignoreApiProvider implements GitignoreProvider {
 
 				stream.on('finish', () => {
 					stream.close();
-					return resolve(operation);
+					return resolve();
 				});
 			}).on('error', (err) => {
 				// Delete the .gitignore file if we created it
